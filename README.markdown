@@ -6,6 +6,7 @@ Git
 ## Installation
 
 clone the repo into a directory that is in your PATH system variable, or you can clone the repo and add the repo path to the PATH variable:
+	
 	git clone ssh://git@github.com:bmilesp/Gitty.git
 
 ## Usage
