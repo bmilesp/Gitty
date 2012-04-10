@@ -28,6 +28,7 @@ submit)
       git commit -am "$3"
       #git add .
       git checkout develop
+      git fetch
       git merge origin/develop
       git checkout "$2"
   	  OUTPUT=$(git merge develop)
