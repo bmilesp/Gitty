@@ -26,7 +26,7 @@ Will commit all changes to branch-name, update develop, merge in develop, and pu
 Will create, checkout, track and pull a remote branch that does not yet exist locally
 
 
-## Author
+## Authors
 Brandon Plasters ([bmilesp] (http://twitter.com/bmilesp))
 
 Benjamin Talavera
