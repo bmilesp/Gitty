@@ -29,3 +29,5 @@ Will create, checkout, track and pull a remote branch that does not yet exist lo
 ## Author
 Brandon Plasters ([bmilesp] (http://twitter.com/bmilesp))
 
+Benjamin Talavera
+
