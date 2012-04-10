@@ -1,3 +1,4 @@
+#!/bin/bash
 case "$1" in
 new-branch)
    	if [ "$2" != "" ] 
@@ -27,10 +28,18 @@ submit)
       git commit -am "$3"
       #git add .
       git checkout develop
-      git merge origin/develop 
+      git merge origin/develop
       git checkout "$2"
-  		git merge develop
-  		git push origin "$2"
+  	  OUTPUT=$(git merge develop)
+  	  echo "outputting:"
+      echo $OUTPUT
+      echo "done outputting."
+      if [[ "$OUTPUT" == *CONFLICT* ]]; then
+        echo 'CONFLICT DETECTED - Running mergetool:'
+      	git mergetool
+      	git commit -am "AUTO GENERATED: mergefix for commit: $3"
+      fi 
+  	  git push origin "$2"
     else
   	  echo "please supply a commit message: gitty commit-push 'branch-name-to-commit-to' 'commit-message'"
     fi
