@@ -1,0 +1,68 @@
+case "$1" in
+new-branch)
+   	if [ "$2" != "" ] 
+	then
+		git checkout develop
+		git checkout -b "$2"
+		git push -u origin "$2"
+	else
+		echo "please supply a branch name: ugpgit new-branch 'new-branch-name'"
+	fi
+;;
+retrieve-branch)
+   	if [ "$2" != "" ] 
+	then
+		git fetch
+		git checkout develop
+		git merge origin/develop
+		git checkout --track -b $2 origin/$2
+	else
+		echo "please supply a branch name: ugpgit retrieve-branch 'remote-branch-name'"
+	fi
+;;
+submit)
+  if [ "$2" != "" ]; then
+    if [ "$3" != "" ]; then
+      git checkout "$2"
+      git commit -am "$3"
+      #git add .
+      git checkout develop
+      git merge origin/develop 
+      git checkout "$2"
+  		git merge develop
+  		git push origin "$2"
+    else
+  	  echo "please supply a commit message: ugpgit commit-push 'branch-name-to-commit-to' 'commit-message'"
+    fi
+  else
+    echo "please supply a branch name: ugpgit commit-push 'branch-name-to-commit-to' 'commit-message'"
+  fi
+;;
+#delete)
+#	if [ "$2" != "" ] 
+#	then
+#		git checkout develop
+#		git branch -d "$2"
+#		#read -p "remote branch $2 is not merged 'gooba gooba gooba' (y/n)?"
+#		#[ "$REPLY" == "y" ] || echo "gooba gooba gooba"
+#		git branch -d -r origin/"$2"
+#		
+#	else
+#		echo "please supply a branch name: ugpgit 'branch-to-delete-name'"
+#	fi
+#;;
+*)
+  echo "pass in the following arguments:";
+  echo " ";
+  echo "new-branch 'branch-name'"
+  echo "Will create a new local and remote tracking branch and checkout the new branch"
+  echo " ";
+  echo "submit 'branch-name' 'commit message'"
+  echo "Will commit all changes to branch-name, update develop, merge in develop, and push the result out to remote branch-name"
+  echo " ";
+  echo "retrieve-branch 'remote-branch-name'"
+  echo "Will create, checkout, track and pull a remote branch that does not yet exist locally"
+	#echo " ";
+      #echo "delete 'branch-name'"
+	#echo "will delete local and remote branch"
+esac
