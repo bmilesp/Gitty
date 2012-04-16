@@ -53,6 +53,7 @@ submit)
       git commit -am "$3"
       #git add .
       git checkout develop
+      git fetch
       git merge origin/develop
       git checkout "$2"
   	  OUTPUT=$(git merge develop)
@@ -64,10 +65,10 @@ submit)
       fi 
   	  git push origin "$2"
     else
-  	  echo "please supply a commit message: gitty commit-push 'branch-name-to-commit-to' 'commit-message'"
+  	  echo "Please supply a commit message: gitty commit-push 'branch-name-to-commit-to' 'commit-message'"
     fi
   else
-    echo "please supply a branch name: gitty commit-push 'branch-name-to-commit-to' 'commit-message'"
+    echo "Please supply a branch name: gitty commit-push 'branch-name-to-commit-to' 'commit-message'"
   fi
 ;;
 delete)
@@ -121,7 +122,10 @@ delete)
 	fi
 ;;
 *)
-  echo "pass in the following arguments:";
+  echo " ";
+  echo " ";
+  echo " ";
+  echo "Pass in the following arguments:";
   echo " ";
   echo "new-branch 'branch-name'"
   echo "Will create a new local and remote tracking branch and checkout the new branch"
