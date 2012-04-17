@@ -30,11 +30,31 @@ function CheckCheckoutError {
 }
 
 
+function updateBranch {
+	CheckCheckoutError $1
+	git fetch
+	mergeBranch $ORIGIN/$1 
+}
+
+
+function mergeBranch {
+	set +e
+	OUTPUT=$(git merge $1)
+    echo $OUTPUT
+    if [[ "$OUTPUT" == *CONFLICT* ]]; then
+        echo 'CONFLICT DETECTED - Running mergetool:'
+      	git mergetool
+      	git commit -am "AUTO GENERATED: mergefix for branch $1"
+    fi 
+}
+
+
+
 case "$1" in
 new-branch)
    	if [ "$2" != "" ] 
 	then
-		CheckCheckoutError $DEVELOP
+		updateBranch $MASTER
 		git checkout -b "$2"
 		git push -u $ORIGIN "$2"
 	else
@@ -44,9 +64,7 @@ new-branch)
 retrieve-branch)
    	if [ "$2" != "" ] 
 	then
-		git fetch
-		CheckCheckoutError $DEVELOP
-		git merge $ORIGIN/$DEVELOP
+		updateBranch $MASTER
 		git checkout --track -b $2 $ORIGIN/$2
 	else
 		echo "please supply a branch name: gitty retrieve-branch 'remote-branch-name'"
@@ -56,20 +74,14 @@ submit)
   if [ "$2" != "" ]; then
     if [ "$3" != "" ]; then
       CheckCheckoutError "$2"
+      set -e
+      git add .
       git commit -am "$3"
-      #git add .
-      git checkout $DEVELOP
-      git fetch
-      git merge $ORIGIN/$DEVELOP
-      git checkout "$2"
-  	  OUTPUT=$(git merge $DEVELOP)
-      echo $OUTPUT
-      if [[ "$OUTPUT" == *CONFLICT* ]]; then
-        echo 'CONFLICT DETECTED - Running mergetool:'
-      	git mergetool
-      	git commit -am "AUTO GENERATED: mergefix for commit: $3"
-      fi 
-  	  git push origin "$2"
+      set +e
+      updateBranch $MASTER
+      CheckCheckoutError "$2"
+      mergeBranch $MASTER
+  	  git push $ORIGIN "$2"
     else
   	  echo "Please supply a commit message: gitty commit-push 'branch-name-to-commit-to' 'commit-message'"
     fi
@@ -78,8 +90,19 @@ submit)
   fi
 ;;
 delete)
-	if [ "$2" != "" ] 
-	then
+	if [ "$2" != "" ]; then
+		if [ "$2" == "$DEVELOP" ]; then
+			echo " "
+			echo "Cannot Delete $DEVELOP branch."
+			echo " "
+			exit
+		fi
+		if [ "$2" == "$MASTER" ]; then
+			echo " "
+			echo "Cannot Delete $MASTER branch."
+			echo " "
+			exit
+		fi
 		set -e
 		if [ "$ARGS" == "3" ]; then
 			if [[ "$3" == '-force' ]]; then
@@ -96,6 +119,7 @@ delete)
 			
 			echo ''
 			echo 'Force deletion successfully completed!'
+			echo ''
 			
 		else
 			CheckCheckoutError $2
@@ -106,7 +130,7 @@ delete)
 			OUTPUT=$(git branch -d "$2")
 			set -e
 			if [[ "$OUTPUT" == "" ]]; then
-				echo "'Not fully merged with $DEVELOP' error, you may use the '-force' option to force delete."
+				echo "'Not fully merged with $MASTER' error, you may use the '-force' option to force delete."
 				exit
 			fi
 			
@@ -114,6 +138,7 @@ delete)
 			git push $ORIGIN :$2
 			echo ''
 			echo 'Deletion successfully completed!'
+			echo ''
 						
 		fi
 		
@@ -122,69 +147,45 @@ delete)
 	fi
 ;;
 merge-stage)
-	if [ "$2" != "" ] 
-	then
-		CheckCheckoutError $DEVELOP
-		git fetch
-	  git merge $ORIGIN/$DEVELOP
-		OUTPUT=$(git merge $2)
-	    echo $OUTPUT
-	    if [[ "$OUTPUT" == *CONFLICT* ]]; then
-	        echo 'CONFLICT DETECTED - Running mergetool:'
-	      	git mergetool
-	      	git commit -am "AUTO GENERATED: mergefix for branch $2"
-	    fi 
+	if [ "$2" != "" ]; then
+		if [ "$2" == "$DEVELOP" ]; then
+			echo " "
+			echo "Cannot merge $DEVELOP into $MASTER"
+			echo " "
+			exit
+		fi
+		updateBranch $MASTER
+		updateBranch $DEVELOP
+	  	mergeBranch $MASTER
+		mergeBranch $2
 	  	git push $ORIGIN $DEVELOP
+	  	CheckCheckoutError $2
 	 else
 	 	echo "Please pass a branch name as an argument: gitty merge-stage branch-name"
 	 fi
 ;;
 merge-master)
-	if [ "$2" != "" ] 
-	then
-		set -e
-		CheckCheckoutError $MASTER
-		git fetch
-    git merge $ORIGIN/$MASTER  
-    
-    CheckCheckoutError $DEVELOP
-    git merge $ORIGIN/$DEVELOP
-    set +e
-    OUTPUT=$(git merge $MASTER)
-    if [[ "$OUTPUT" == *CONFLICT* ]]; then
-        echo 'CONFLICT DETECTED WHEN MERGING MASTER INTO $DEVELOP - Running mergetool:'
-      	git mergetool
-      	git commit -am "AUTO GENERATED: mergefix for branch: $2"
-      	echo "$MASTER has a merge conflict with $DEVELOP when $MASTER was merged into $DEVELOP. That may mean that $DEVELOP is not up to date with $MASTER."
-		echo " "
-		echo "If you're certain that $DEVELOP conflicts are ok, There are two options available to continue:"
-		echo "1) If there are changes in $DEVELOP you do not want to merge into $MASTER or $2 yet, run: git checkout $2 & git merge $MASTER. then re-run: gitty merge-master $2"
-		echo "2) If you want to sync-up all branches including $DEVELOP, run: gitty merge-stage $2 then re-run: gitty merge-master $2"
-		echo " "
-		exit
-    fi 
-	    
-	    set -e
-	    CheckCheckoutError $2
-	    git merge $ORIGIN/$2
-	    set +e
-	    
-	    OUTPUT=$(git merge $MASTER)
-	    echo $OUTPUT
-	    if [[ "$OUTPUT" == *CONFLICT* ]]; then
-	        echo 'CONFLICT DETECTED WHEN MERGING MASTER INTO $2 - Running mergetool:'
-	      	git mergetool
-	      	git commit -am "AUTO GENERATED: mergefix for branch: $2"
-	      	echo "$MASTER has a merge conflict with $2 when $MASTER was merged into $2. That may mean that $DEVELOP is not merged with $MASTER. To verify everything is correct, run: gitty merge-stage $2 and test again before merging master again."
+	if [ "$2" != "" ]; then
+		if [ "$2" == "$DEVELOP" ]; then
 			echo " "
-			echo "If you're certain that $2 conflicts are ok, run: gitty merge-master $2 again."
+			echo "Cannot merge $DEVELOP into $MASTER"
+			echo " "
 			exit
-	    fi 
+		fi
+		updateBranch $MASTER
+		updateBranch $2
+		mergeBranch $MASTER
+		
+		CheckCheckoutError $DEVELOP
+		mergeBranch $2
+		mergeBranch $MASTER
+    	
+    	CheckCheckoutError $MASTER
+	    mergeBranch $2
 	    
-	    CheckCheckoutError $MASTER
-	    set -e
-	    git merge $2
 	    git push $ORIGIN $MASTER
+	    
+	    CheckCheckoutError $2
 	    
 	 else
 	 	echo "Please pass a branch name as an argument: gitty merge-master branch-name"
