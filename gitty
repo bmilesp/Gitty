@@ -58,7 +58,7 @@ new-branch)
 		git checkout -b "$2"
 		git push -u $ORIGIN "$2"
 	else
-		echo "please supply a branch name: gitty new-branch 'new-branch-name'"
+		echo "please supply a branch name: gitty new-branch <new-branch-name>"
 	fi
 ;;
 retrieve-branch)
@@ -67,7 +67,7 @@ retrieve-branch)
 		updateBranch $MASTER
 		git checkout --track -b $2 $ORIGIN/$2
 	else
-		echo "please supply a branch name: gitty retrieve-branch 'remote-branch-name'"
+		echo "please supply a branch name: gitty retrieve-branch <remote-branch-name>"
 	fi
 ;;
 submit)
@@ -83,10 +83,10 @@ submit)
       mergeBranch $MASTER
   	  git push $ORIGIN "$2"
     else
-  	  echo "Please supply a commit message: gitty commit-push 'branch-name-to-commit-to' 'commit-message'"
+  	  echo "Please supply a commit message: gitty commit-push <branch-name-to-commit-to> 'commit-message'"
     fi
   else
-    echo "Please supply a branch name: gitty commit-push 'branch-name-to-commit-to' 'commit-message'"
+    echo "Please supply a branch name: gitty commit-push <branch-name-to-commit-to> 'commit-message'"
   fi
 ;;
 delete)
@@ -143,7 +143,7 @@ delete)
 		fi
 		
 	else
-		echo "Please supply a branch name: gitty delete 'branch-to-delete-name'"
+		echo "Please supply a branch name: gitty delete <branch-to-delete-name>"
 	fi
 ;;
 merge-stage)
@@ -161,7 +161,7 @@ merge-stage)
 	  	git push $ORIGIN $DEVELOP
 	  	CheckCheckoutError $2
 	 else
-	 	echo "Please pass a branch name as an argument: gitty merge-stage branch-name"
+	 	echo "Please pass a branch name as an argument: gitty merge-stage <branch-name>"
 	 fi
 ;;
 merge-master)
@@ -188,10 +188,17 @@ merge-master)
 	    CheckCheckoutError $2
 	    
 	 else
-	 	echo "Please pass a branch name as an argument: gitty merge-master branch-name"
+	 	echo "Please pass a branch name as an argument: gitty merge-master <branch-name>"
 	 fi
 ;;
-
+update-branch)
+   	if [ "$2" != "" ] 
+	then
+		updateBranch $2
+	else
+		echo "please supply a branch name: gitty update-branch <branch-name>"
+	fi
+;;
 
 *)
   echo " ";
@@ -199,22 +206,25 @@ merge-master)
   echo " ";
   echo "Pass in the following arguments:";
   echo " ";
-  echo "new-branch 'branch-name'"
+  echo "new-branch <branch-name>"
   echo "Will create a new local and remote tracking branch and checkout the new branch"
   echo " ";
-  echo "submit 'branch-name' 'commit message'"
+  echo "submit <branch-name> 'commit message'"
   echo "Will commit all changes to branch-name, update $DEVELOP, merge in $DEVELOP, and push the result out to remote branch-name"
   echo " ";
-  echo "retrieve-branch 'remote-branch-name'"
+  echo "retrieve-branch <remote-branch-name>"
   echo "Will create, checkout, track and pull a remote branch that does not yet exist locally"
   echo " ";
-  echo "delete 'branch-name' [-force]"
+  echo "update-branch <branch-name>"
+  echo "Will fetch and merge a specific branch that exists both locally and remotely"
+  echo " ";
+  echo "delete <branch-name> [-force]"
   echo "Will delete local and remote branch but will check if they are merged with other branches first for safety. Passing the optional -force parameter will force the deletion even if it is not merged in. "
   echo " ";
-  echo "merge-stage 'branch-name'"
+  echo "merge-stage <branch-name>"
   echo "Will update $DEVELOP branch from $ORIGIN, then merge branch-name into $DEVELOP, then push changes to the stage and test sites"
   echo " ";
-  echo "merge-master 'branch-name'"
+  echo "merge-master <branch-name>"
   echo "Will make sure branch-name is merged into $DEVELOP first, merge branch-name into $MASTER, then push to the live site"
   echo " ";
   echo " ";
