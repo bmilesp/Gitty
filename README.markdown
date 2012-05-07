@@ -37,6 +37,7 @@ Will update $DEVELOP branch from $ORIGIN, then merge branch-name into $DEVELOP, 
 	merge-master <branch-name>
 Will make sure branch-name is merged into $DEVELOP first, merge branch-name into $MASTER, then push to the live site
 
+
 	update-branch <branch-name>
 Will fetch and merge a specific branch that exists both locally and remotely
 
