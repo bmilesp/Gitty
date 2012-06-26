@@ -56,6 +56,7 @@ new-branch)
 	then
 		updateBranch $MASTER
 		git checkout -b "$2"
+		git merge $DEVELOP
 		git push -u $ORIGIN "$2"
 	else
 		echo "please supply a branch name: gitty new-branch <new-branch-name>"
@@ -198,6 +199,20 @@ update-branch)
 	else
 		echo "please supply a branch name: gitty update-branch <branch-name>"
 	fi
+;;
+sanitize-stage)
+	
+	#this will work but you will not be able to re-merge files that have already been merged unless
+	#they have been changed. not what we want so will have to find a way to revert the branch in
+	#a way that will allow the branch to be re-merged in
+	
+	#updateBranch $MASTER
+	#CheckCheckoutError $DEVELOP
+	#git reset $MASTER -- . 
+	#git checkout
+	#git commit -m "sanitized to $MASTER"
+	#mergeBranch $MASTER
+	#git push $ORIGIN $DEVELOP
 ;;
 
 *)
