@@ -219,6 +219,11 @@ sanitize-stage)
   echo " ";
   echo " ";
   echo " ";
+  echo "**********";
+  echo "GITTY v0.9";
+  echo "**********";
+  echo " ";
+  echo " ";
   echo "Pass in the following arguments:";
   echo " ";
   echo "new-branch <branch-name>"
